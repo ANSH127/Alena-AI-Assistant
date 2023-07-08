@@ -1,26 +1,58 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, Alert } from 'react-native'
 import React from 'react'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Features from '../components/features';
-import { dummyMessages } from '../constants';
+// import { dummyMessages } from '../constants';
 import { ScrollView } from 'react-native';
 import { TouchableOpacity } from 'react-native';
+import { TextInput } from 'react-native';
+import { MagnifyingGlassIcon } from 'react-native-heroicons/outline';
+import { apiCall } from '../api/openAI';
+
 
 
 export default function HomeScreen() {
-  const [messages, setMessages] = React.useState(dummyMessages)
-  const [recording, setRecording] = React.useState(false)
-  const [speaking, setSpeaking] = React.useState(true)
+  const [messages, setMessages] = React.useState([])
+  const [result, setResult] = React.useState('')
+  const ScrollViewRef = React.useRef(null);
+  const [loading, setLoading] = React.useState(false);
 
-  const clear=()=>{
-    setMessages([])
+
+  const fetchResonse = () => {
+    if (result.trim().length > 0) {
+      let newMessages = [...messages];
+      newMessages.push({ role: 'user', content: result.trim() })
+      setMessages(newMessages);
+      setResult('');
+      updateScrollViews();
+      setLoading(true);
+      apiCall(result.trim(), newMessages).then(data => {
+        setLoading(false);
+        if (data.success) {
+          setMessages([...data.data]);
+          updateScrollViews();
+
+        }
+        else {
+          Alert.alert('Error', data.msg)
+        }
+
+      })
+
+
+    }
   }
-  const stopSpeaking=()=>{
-    setSpeaking(false);
+
+  const updateScrollViews = () => {
+    setTimeout(() => {
+
+      ScrollViewRef?.current?.scrollToEnd({ animated: true })
+    }, 2000);
   }
+
   return (
-    <View className='flex-1 bg-white'>
+    <ScrollView automaticallyAdjustKeyboardInsets={true} className='flex-1 bg-white'>
       <SafeAreaView className='flex-1 flex mx-5'>
         {/* bot icon */}
         <View className='flex-row  justify-center '>
@@ -35,7 +67,7 @@ export default function HomeScreen() {
                 Alena
               </Text>
               <View style={{ height: hp(58) }} className='bg-neutral-200 rounded-3xl p-4'>
-                <ScrollView bounces={false} className='space-y-4' showsVerticalScrollIndicator={false}>
+                <ScrollView ref={ScrollViewRef} bounces={false} className='space-y-4' showsVerticalScrollIndicator={false}>
                   {
                     messages.map((message, index) => {
                       if (message.role === 'assistant') {
@@ -83,43 +115,31 @@ export default function HomeScreen() {
             </View>
           ) : (<Features />)
         }
+        {/* input */}
+        {
+          loading ? (
+            <View className='flex justify-center items-center'>
+            <Image source={require('../../assets/images/loading.gif')} style={{ width: wp(20), height: wp(20) }} 
 
-        {/* recording,clear,stop buttons */}
+            />
+            </View>
+          ):
 
-        <View className='flex justify-center items-center'>
-          {
-            recording ? (
+          <View className='flex flex-row justify-between items-center mt-8 border border-neutral-500 rounded-full' >
+          <TextInput placeholder='Search' placeholderTextColor='black' className='text-black p-4  flex-1 text-base font-semibold tracking-wider' onChangeText={
+            (text) => {
+              setResult(text)
+            }
+          } value={result} />
+          <TouchableOpacity className='rounded-full p-3 m-1 bg-neutral-500' onPress={fetchResonse} >
+            <MagnifyingGlassIcon size='24' color='white' />
 
-              <TouchableOpacity>
-                <Image className='rounded-full' source={require('../../assets/images/voiceLoading.gif')} style={{ width: hp(10), height: hp(10) }} />
-              </TouchableOpacity>
-            ) : (
+          </TouchableOpacity>
 
-              <TouchableOpacity>
-                <Image className='rounded-full' source={require('../../assets/images/recordingIcon.png')} style={{ width: hp(10), height: hp(10) }} />
-              </TouchableOpacity>
-            )
-          }
 
-          {
-            messages.length>0 &&
-            (
-              <TouchableOpacity className='bg-neutral-400 rounded-3xl p-2 absolute right-6' onPress={clear} >
-                <Text className='text-white text-lg px-2 font-semibold'>Clear</Text>
-              </TouchableOpacity>
-            )
-          }
-          {
-            speaking &&
-            (
-              <TouchableOpacity className='bg-red-400 rounded-3xl p-2 absolute left-6' onPress={stopSpeaking} >
-                <Text className='text-white text-lg px-2 font-semibold'>Stop</Text>
-              </TouchableOpacity>
-            )
-          }
-        </View>
+        </View>}
 
       </SafeAreaView>
-    </View>
+    </ScrollView>
   )
 }
