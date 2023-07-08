@@ -3,6 +3,7 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { TouchableOpacity } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { themeColors } from '../theme';
 
 export default function WelcomeScreen({navigation}) {
     return (
@@ -16,7 +17,7 @@ export default function WelcomeScreen({navigation}) {
             <View className='flex-row justify-center'>
                 <Image source={require('../../assets/images/welcome.webp')} style={{width:wp(100),height:hp(55)}} />
             </View>
-            <TouchableOpacity className='mx-5 p-4 rounded-2xl ' style={{backgroundColor:'#6fefa6'}} onPress={()=> navigation.navigate('Home')} >
+            <TouchableOpacity className='mx-5 p-4 rounded-2xl ' style={{backgroundColor:themeColors.bgColor}} onPress={()=> navigation.navigate('Home')} >
                 <Text style={{fontSize:wp(6)}} className='text-center text-white font-semibold '>Get Started</Text>
             </TouchableOpacity>
 
