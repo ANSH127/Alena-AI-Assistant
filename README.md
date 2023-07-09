@@ -1,7 +1,7 @@
 
 # Alena AI Assistant
 
-This is a ai sssistant
+Alena is a Ai Assistant which has the ability to talk to you and answer your questions . It is made using React Native and OpenAI API.
 
 ## Run Locally
 
