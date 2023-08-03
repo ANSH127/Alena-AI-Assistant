@@ -1,4 +1,6 @@
-export const apiKey = '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';
+import {API_KEY} from "@env"
+
+export const apiKey = API_KEY;
 // in some cases your api key maybe already expired
 // try to use a new account to create an api key
 
